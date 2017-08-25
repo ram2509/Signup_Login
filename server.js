@@ -1,14 +1,19 @@
 var express = require('express');
-var morgan = require('morgan')
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const exphbs = require('express-handlebars');
-const flash = require('connect-flash');
-const session = require('express-session');
+var morgan = require('morgan');
+var path = require('path');
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var exphbs = require('express-handlebars');
+var flash = require('connect-flash');
+var session = require('express-session');
+var mongodb = require('mongodb');
+var mongoose = require('mongoose');
+
 var port = process.env.PORT||5000;
 
-const app = express();
+var app = express();
 app.use(morgan('dev'));
 
 //view engine
@@ -33,7 +38,16 @@ app.use(session({
     resave: false
 }));
 
+//passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(flash());
+app.use(function (req,res,next) {
+    res.locals.success_message = req.flash('success');
+    res.locals.error_message = req.flash('error');
+    next();
+});
 
 var routes = {
     index : require('./routes/index'),
